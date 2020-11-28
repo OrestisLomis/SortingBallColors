@@ -1,6 +1,7 @@
 import random
 
 def make_level(colors):
+    assert colors >= 2
     all_states = [[] for i in range(colors + 2)]
     print(all_states)
     for color in range(colors):
@@ -12,4 +13,4 @@ def make_level(colors):
                 balls += 1
     print(all_states)
 
-make_level(7)
+make_level(0)
