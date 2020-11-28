@@ -12,5 +12,21 @@ def make_level(colors):
                 all_states[tube].append(color)
                 balls += 1
     print(all_states)
+    return all_states
 
-make_level(0)
+def move_ball(tubes, start, goal):
+    # assert len(tubes[start]) > 0
+    # assert len(tubes[goal]) < 4
+
+    if len(tubes[start]) > 0 and len(tubes[goal]) < 4:
+        ball = tubes[start].pop(-1)
+        tubes[goal].append(ball)
+    return tubes
+
+states = make_level(4)
+for i in range(20):
+    start = random.randint(0, 5)
+    goal = random.randint(0, 5)
+    states = move_ball(states, start, goal)
+    print(states)
+
