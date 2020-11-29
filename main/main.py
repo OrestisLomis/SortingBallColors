@@ -1,14 +1,26 @@
 import random
 import copy
 
+PINK = 0
+LIGHTGREEN = 1
+DARKGREEN = 2
+DARKBLUE = 3
+LIGHTBLUE = 4
+ORANGE = 5
+PURPLE = 6
+RED = 7
+GREY = 8
+
+COLORS = [PINK, PURPLE, LIGHTBLUE, LIGHTGREEN, DARKBLUE, DARKGREEN, RED, GREY, ORANGE]
+
 def make_level(colors):
-    assert colors >= 2
-    all_states = [[] for i in range(colors + 2)]
+    assert len(COLORS) >= 2
+    all_states = [[] for i in range(len(COLORS) + 2)]
     print(all_states)
-    for color in range(colors):
+    for color in COLORS:
         balls = 0
         while balls < 4:
-            tube = random.randint(0, colors - 1)
+            tube = random.randint(0, len(COLORS) - 1)
             if len(all_states[tube]) < 4:
                 all_states[tube].append(color)
                 balls += 1
@@ -82,6 +94,7 @@ def end_state(tubes):
 
 
 tubes = make_level(9)
+tubes = [[LIGHTGREEN, DARKGREEN, LIGHTGREEN, DARKBLUE], [LIGHTGREEN, GREY, LIGHTBLUE, PURPLE], [LIGHTGREEN, PINK, PURPLE, PURPLE], [GREY, LIGHTBLUE, LIGHTBLUE, DARKGREEN], [PINK, DARKBLUE, GREY, DARKBLUE], [RED, GREY, RED, RED], [RED, PINK, PURPLE, ORANGE], [DARKGREEN, ORANGE, DARKBLUE, PINK], [DARKGREEN, ORANGE, ORANGE, LIGHTBLUE], [], []]
 tubes_orig = copy.deepcopy(tubes)
 states = list()
 while not win(tubes):
