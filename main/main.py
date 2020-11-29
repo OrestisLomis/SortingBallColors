@@ -84,5 +84,4 @@ for i in range(10000):
         break
     print(states)
 
-get_all_moves(states)
 
