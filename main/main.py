@@ -90,7 +90,6 @@ while not win(tubes):
     while not end_state(tubes):
         tubes_copy = copy.deepcopy(tubes)
         tubes_copy = sorted(tubes_copy)
-        
         all_moves = get_all_moves(tubes, states)
         print(all_moves)
         move = all_moves[random.randint(0, len(all_moves) - 1)]
@@ -98,8 +97,3 @@ while not win(tubes):
         tubes = move_ball(tubes, move[0], move[1])
         print(tubes) 
         states.append(tubes_copy)
-    
-    
-    
-
-
