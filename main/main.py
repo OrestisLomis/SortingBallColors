@@ -53,9 +53,13 @@ def can_move(tubes, start, goal, states):
 
 def get_all_moves_from_tube(tubes, start, states):
     all_moves = []
+    tubes_copy = copy.deepcopy(tubes)
     for goal in range(len(tubes)):
         if can_move(tubes, start, goal, states):
-            all_moves.append((start, goal))
+            move_ball(tubes_copy, start, goal)
+            h = heuristic(tubes)
+            all_moves.append((h, start, goal))
+        tubes_copy = copy.deepcopy(tubes)   
     return all_moves
 
 def get_all_moves(tubes, states):
@@ -83,7 +87,7 @@ def win(tubes):
             return False
     return True
 
-def end_state(tubes):
+def end_state(tubes, states):
     if win(tubes):
         print('WIN!')
         return True
@@ -92,21 +96,60 @@ def end_state(tubes):
         return True
     return False
 
+def heuristic_for_tube(tube):
+    heuristic = 0
+    if not complete(tube):
+        lowest = tube[0]
+        for ball in range (1, len(tube)):
+            if ball != lowest:
+                heuristic += len(tube) - ball
+                break
+    return heuristic
+        
+def heuristic(tubes):
+    heuristic = 0
+    for tube in tubes:
+        heuristic += heuristic_for_tube(tube)
 
-tubes = make_level(9)
+    tubes = sorted(tubes)
+
+    heuristic += 2 * (len(tubes[0]) + len(tubes[1]))
+    return heuristic
+
+def solve(tubes):
+    states = []
+    while not win(tubes):
+        tubes = copy.deepcopy(tubes_orig)
+        states = []
+        while not end_state(tubes, states):
+            tubes_copy = copy.deepcopy(tubes)
+            tubes_copy = sorted(tubes_copy)
+            all_moves = get_all_moves(tubes, states)
+            print(all_moves)
+            move = all_moves[random.randint(0, len(all_moves) - 1)]
+            print(move)
+            tubes = move_ball(tubes, move[1], move[2])
+            print(tubes) 
+            states.append(tubes_copy)
+
+
+
+# tubes = make_level(9)
 tubes = [[LIGHTGREEN, DARKGREEN, LIGHTGREEN, DARKBLUE], [LIGHTGREEN, GREY, LIGHTBLUE, PURPLE], [LIGHTGREEN, PINK, PURPLE, PURPLE], [GREY, LIGHTBLUE, LIGHTBLUE, DARKGREEN], [PINK, DARKBLUE, GREY, DARKBLUE], [RED, GREY, RED, RED], [RED, PINK, PURPLE, ORANGE], [DARKGREEN, ORANGE, DARKBLUE, PINK], [DARKGREEN, ORANGE, ORANGE, LIGHTBLUE], [], []]
 tubes_orig = copy.deepcopy(tubes)
-states = list()
-while not win(tubes):
-    tubes = copy.deepcopy(tubes_orig)
-    states = []
-    while not end_state(tubes):
-        tubes_copy = copy.deepcopy(tubes)
-        tubes_copy = sorted(tubes_copy)
-        all_moves = get_all_moves(tubes, states)
-        print(all_moves)
-        move = all_moves[random.randint(0, len(all_moves) - 1)]
-        print(move)
-        tubes = move_ball(tubes, move[0], move[1])
-        print(tubes) 
-        states.append(tubes_copy)
+print(tubes)
+print(heuristic(tubes))
+solve(tubes)
+# while not win(tubes):
+#     tubes = copy.deepcopy(tubes_orig)
+#     states = []
+#     while not end_state(tubes):
+#         tubes_copy = copy.deepcopy(tubes)
+#         tubes_copy = sorted(tubes_copy)
+#         all_moves = get_all_moves(tubes, states)
+#         print(all_moves)
+#         move = all_moves[random.randint(0, len(all_moves) - 1)]
+#         print(move)
+#         tubes = move_ball(tubes, move[0], move[1])
+#         print(tubes) 
+#         states.append(tubes_copy)
