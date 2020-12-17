@@ -11,16 +11,18 @@ PURPLE = 6
 RED = 7
 GREY = 8
 
-COLORS = [PINK, PURPLE, LIGHTBLUE, LIGHTGREEN, DARKBLUE, DARKGREEN, RED, GREY, ORANGE]
+COLORS = [PINK, LIGHTGREEN, DARKGREEN, DARKBLUE, LIGHTBLUE, ORANGE, PURPLE, RED, GREY]
 
-def make_level(colors):
-    assert len(COLORS) >= 2
-    all_states = [[] for i in range(len(COLORS) + 2)]
+def make_level(level, colors):
+    colors = colors[:level]
+
+    assert len(colors) >= 2
+    all_states = [[] for i in range(len(colors) + 2)]
     print(all_states)
-    for color in COLORS:
+    for color in colors:
         balls = 0
         while balls < 4:
-            tube = random.randint(0, len(COLORS) - 1)
+            tube = random.randint(0, len(colors) - 1)
             if len(all_states[tube]) < 4:
                 all_states[tube].append(color)
                 balls += 1
@@ -51,25 +53,26 @@ def can_move(tubes, start, goal, states):
         return not visited(sorted(tubes_copy), states)
     return False
 
-def get_all_moves_from_tube(tubes, start, states):
+def get_all_moves_from_tube(tubes, start, states, c):
     all_moves = []
     tubes_copy = copy.deepcopy(tubes)
     for goal in range(len(tubes)):
         if can_move(tubes, start, goal, states):
-            move_ball(tubes_copy, start, goal)
-            h = heuristic(tubes)
-            all_moves.append((h, start, goal))
+            tubes_copy = move_ball(tubes_copy, start, goal)
+            h = heuristic(tubes_copy)
+            f = h + c
+            all_moves.append((f, start, goal, tubes))
         tubes_copy = copy.deepcopy(tubes)   
     return all_moves
 
-def get_all_moves(tubes, states):
+def get_all_moves(tubes, states, c):
     all_moves = []
     for start in range(len(tubes)):
-        all_moves.extend(get_all_moves_from_tube(tubes, start, states))
-    return all_moves
+        all_moves.extend(get_all_moves_from_tube(tubes, start, states, c))
+    return sorted(all_moves)
 
-def game_over(tubes, states):
-    return len(get_all_moves(tubes, states)) == 0
+def game_over(tubes, states, c):
+    return len(get_all_moves(tubes, states, c)) == 0
 
 def complete(tube):
     if len(tube) == 0:
@@ -87,11 +90,11 @@ def win(tubes):
             return False
     return True
 
-def end_state(tubes, states):
+def end_state(tubes, states, c):
     if win(tubes):
         print('WIN!')
         return True
-    if game_over(tubes, states):
+    if game_over(tubes, states, c):
         print('GAME OVER!')
         return True
     return False
@@ -101,7 +104,7 @@ def heuristic_for_tube(tube):
     if not complete(tube):
         lowest = tube[0]
         for ball in range (1, len(tube)):
-            if ball != lowest:
+            if tube[ball] != lowest:
                 heuristic += len(tube) - ball
                 break
     return heuristic
@@ -111,45 +114,37 @@ def heuristic(tubes):
     for tube in tubes:
         heuristic += heuristic_for_tube(tube)
 
-    tubes = sorted(tubes)
+    tubes = sorted(tubes, key=len)
 
-    heuristic += 2 * (len(tubes[0]) + len(tubes[1]))
+    heuristic += (len(tubes[0]) + len(tubes[1]))
     return heuristic
 
 def solve(tubes):
-    states = []
-    while not win(tubes):
-        tubes = copy.deepcopy(tubes_orig)
-        states = []
-        while not end_state(tubes, states):
-            tubes_copy = copy.deepcopy(tubes)
-            tubes_copy = sorted(tubes_copy)
-            all_moves = get_all_moves(tubes, states)
-            print(all_moves)
-            move = all_moves[random.randint(0, len(all_moves) - 1)]
-            print(move)
-            tubes = move_ball(tubes, move[1], move[2])
-            print(tubes) 
-            states.append(tubes_copy)
+    print(tubes)
+    visited = []
+    cost = 0
+    frontier = []
+    while not end_state(tubes, visited, cost):
+        tubes_copy = copy.deepcopy(tubes)
+        tubes_copy = sorted(tubes_copy)
+        all_moves = get_all_moves(tubes, visited, cost)
+        frontier.extend(all_moves)
+        frontier = sorted(frontier)
+        print(frontier)
+        best = frontier.pop(0)
+        move = best[1:3]
+        tubes = best[-1]
+        cost = None #FIXME
+        print(move[1:3])
+        tubes = move_ball(tubes, move[0], move[1])
+        #cost += 1
+        print(tubes) 
+        visited.append(tubes)
 
 
+#TODO rework solver for A* instead of random search
 
-# tubes = make_level(9)
-tubes = [[LIGHTGREEN, DARKGREEN, LIGHTGREEN, DARKBLUE], [LIGHTGREEN, GREY, LIGHTBLUE, PURPLE], [LIGHTGREEN, PINK, PURPLE, PURPLE], [GREY, LIGHTBLUE, LIGHTBLUE, DARKGREEN], [PINK, DARKBLUE, GREY, DARKBLUE], [RED, GREY, RED, RED], [RED, PINK, PURPLE, ORANGE], [DARKGREEN, ORANGE, DARKBLUE, PINK], [DARKGREEN, ORANGE, ORANGE, LIGHTBLUE], [], []]
-tubes_orig = copy.deepcopy(tubes)
-print(tubes)
-print(heuristic(tubes))
+tubes = make_level(4, COLORS)
+
 solve(tubes)
-# while not win(tubes):
-#     tubes = copy.deepcopy(tubes_orig)
-#     states = []
-#     while not end_state(tubes):
-#         tubes_copy = copy.deepcopy(tubes)
-#         tubes_copy = sorted(tubes_copy)
-#         all_moves = get_all_moves(tubes, states)
-#         print(all_moves)
-#         move = all_moves[random.randint(0, len(all_moves) - 1)]
-#         print(move)
-#         tubes = move_ball(tubes, move[0], move[1])
-#         print(tubes) 
-#         states.append(tubes_copy)
+
