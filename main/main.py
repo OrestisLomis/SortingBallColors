@@ -1,5 +1,6 @@
 import random
 import copy
+from operator import itemgetter
 
 PINK = 0
 LIGHTGREEN = 1
@@ -61,7 +62,8 @@ def get_all_moves_from_tube(tubes, start, states, c):
             tubes_copy = move_ball(tubes_copy, start, goal)
             h = heuristic(tubes_copy)
             f = h + c
-            all_moves.append((f, start, goal, tubes))
+            move = {'f': f, 'start': start, 'goal': goal, 'tubes': tubes, 'cost': c}
+            all_moves.append(move)
         tubes_copy = copy.deepcopy(tubes)   
     return all_moves
 
@@ -69,7 +71,8 @@ def get_all_moves(tubes, states, c):
     all_moves = []
     for start in range(len(tubes)):
         all_moves.extend(get_all_moves_from_tube(tubes, start, states, c))
-    return sorted(all_moves)
+    all_moves.sort(key=itemgetter('f'))
+    return all_moves
 
 def game_over(tubes, states, c):
     return len(get_all_moves(tubes, states, c)) == 0
@@ -129,22 +132,25 @@ def solve(tubes):
         tubes_copy = sorted(tubes_copy)
         all_moves = get_all_moves(tubes, visited, cost)
         frontier.extend(all_moves)
-        frontier = sorted(frontier)
+        frontier.sort(key=itemgetter('f'))
         print(frontier)
         best = frontier.pop(0)
-        move = best[1:3]
-        tubes = best[-1]
-        cost = None #FIXME
-        print(move[1:3])
-        tubes = move_ball(tubes, move[0], move[1])
-        #cost += 1
+        print(best)
+        start = best['start']
+        goal = best['goal']
+        tubes = best['tubes']
+        cost = best['cost']
+        tubes = move_ball(tubes, start, goal)
+        cost += 1
         print(tubes) 
         visited.append(tubes)
 
 
 #TODO rework solver for A* instead of random search
+#TODO make test suite
 
-tubes = make_level(4, COLORS)
+# tubes = make_level(2, COLORS)
+tubes = [[0, 1, 1, 1], [0, 0, 0, 1], [], []]
 
 solve(tubes)
 
