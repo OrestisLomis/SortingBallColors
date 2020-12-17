@@ -45,7 +45,7 @@ def can_move_legally(tubes, start, goal):
     return len(tubes[goal]) == 0 or tubes[start][-1] == tubes[goal][-1]
 
 def visited(tubes, states):
-    return tubes in states
+    return tubes in states # actual snipping could be added but the heuristic used is consistent and admissable so it's not necessary and would only make things more complicated, this is more elegant
 
 def can_move(tubes, start, goal, states):
     tubes_copy = copy.deepcopy(tubes)
@@ -58,11 +58,13 @@ def get_all_moves_from_tube(tubes, start, states, c):
     all_moves = []
     tubes_copy = copy.deepcopy(tubes)
     for goal in range(len(tubes)):
-        if can_move(tubes, start, goal, states):
+        cost = c
+        if can_move(tubes_copy, start, goal, states):
             tubes_copy = move_ball(tubes_copy, start, goal)
+            cost += 1
             h = heuristic(tubes_copy)
-            f = h + c
-            move = {'f': f, 'start': start, 'goal': goal, 'tubes': tubes, 'cost': c}
+            f = h + cost
+            move = {'f': f, 'start': start, 'goal': goal, 'tubes': tubes_copy, 'cost': cost} #TODO fix same tubes_copy being altered (might have to solve this recursively)
             all_moves.append(move)
         tubes_copy = copy.deepcopy(tubes)   
     return all_moves
@@ -96,6 +98,7 @@ def win(tubes):
 def end_state(tubes, states, c):
     if win(tubes):
         print('WIN!')
+        print("cost: ", c)
         return True
     if game_over(tubes, states, c):
         print('GAME OVER!')
@@ -140,17 +143,32 @@ def solve(tubes):
         goal = best['goal']
         tubes = best['tubes']
         cost = best['cost']
+        print(start, goal)
         tubes = move_ball(tubes, start, goal)
-        cost += 1
+        print(tubes) 
+        visited.append(tubes)
+
+def solve_recursive(tubes, c, visited):
+    print(tubes)
+    frontier = []
+    while not end_state(tubes, visited, cost):
+        tubes_copy = copy.deepcopy(tubes)
+        tubes_copy = sorted(tubes_copy)
+        all_moves = get_all_moves(tubes, visited, cost)
+        frontier.extend(all_moves)
+        frontier.sort(key=itemgetter('f'))
+        print(frontier)
+        best = frontier.pop(0)
+        print(best)
+        start = best['start']
+        goal = best['goal']
+        tubes = best['tubes']
+        cost = best['cost']
+        print(start, goal)
+        tubes = move_ball(tubes, start, goal)
         print(tubes) 
         visited.append(tubes)
 
 
 #TODO rework solver for A* instead of random search
-#TODO make test suite
-
-# tubes = make_level(2, COLORS)
-tubes = [[0, 1, 1, 1], [0, 0, 0, 1], [], []]
-
-solve(tubes)
-
+#TODO recursive?
