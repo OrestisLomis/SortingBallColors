@@ -64,7 +64,7 @@ def get_all_moves_from_tube(tubes, start, states, c):
             cost += 1
             h = heuristic(tubes_copy)
             f = h + cost
-            move = {'f': f, 'start': start, 'goal': goal, 'tubes': copy.deepcopy(tubes), 'cost': cost} #TODO fix same tubes_copy being altered (might have to solve this recursively)
+            move = {'f': f, 'h': h, 'start': start, 'goal': goal, 'tubes': copy.deepcopy(tubes), 'cost': cost} #TODO fix same tubes_copy being altered (might have to solve this recursively)
             all_moves.append(move)
         tubes_copy = copy.deepcopy(tubes)   
     return all_moves
@@ -73,6 +73,7 @@ def get_all_moves(tubes, states, c):
     all_moves = []
     for start in range(len(tubes)):
         all_moves.extend(get_all_moves_from_tube(tubes, start, states, c))
+    all_moves.sort(key=itemgetter('h'))
     all_moves.sort(key=itemgetter('f'))
     return all_moves
 
@@ -140,6 +141,7 @@ def solve(tubes):
         tubes_copy = sorted(tubes_copy)
         all_moves = get_all_moves(tubes, visited, cost)
         frontier.extend(all_moves)
+        frontier.sort(key=itemgetter('h'))
         frontier.sort(key=itemgetter('f'))
         # print(frontier)
         best = frontier.pop(0)
