@@ -61,6 +61,8 @@ def get_all_moves_from_tube(tubes, start, states, c):
         cost = c
         if can_move(tubes_copy, start, goal, states):
             tubes_copy = move_ball(tubes_copy, start, goal)
+            if visited(tubes_copy, states):
+                continue
             cost += 1
             h = heuristic(tubes_copy)
             f = h + cost
@@ -73,15 +75,15 @@ def get_all_moves(tubes, states, c):
     all_moves = []
     for start in range(len(tubes)):
         all_moves.extend(get_all_moves_from_tube(tubes, start, states, c))
-    all_moves.sort(key=itemgetter('h'))
-    all_moves.sort(key=itemgetter('f'))
+    # all_moves.sort(key=itemgetter('h'))
+    # all_moves.sort(key=itemgetter('f'))
     return all_moves
 
-# def game_over(frontier, cost):
-#     return len(frontier) == 0 and cost != 0
+def game_over(frontier, cost):
+    return len(frontier) == 0 and cost != 0
 
-def game_over(tubes, states, c):
-    return len(get_all_moves(tubes, states, c)) == 0
+# def game_over(tubes, states, c):
+#     return len(get_all_moves(tubes, states, c)) == 0
 
 def complete(tube):
     if len(tube) == 0:
@@ -99,14 +101,14 @@ def win(tubes):
             return False
     return True
 
-# def end_state(tubes, frontier, c):
-def end_state(tubes, states, c):
+def end_state(tubes, frontier, c):
+# def end_state(tubes, states, c):
     if win(tubes):
         print('WIN!')
         print("cost: ", c)
         return True
-    # if game_over(frontier, c):
-    if game_over(tubes, states, c):
+    if game_over(frontier, c):
+    # if game_over(tubes, states, c):
         print('GAME OVER!')
         return True
     return False
@@ -123,12 +125,11 @@ def heuristic_for_tube(tube):
         
 def heuristic(tubes):
     heuristic = 0
+
     for tube in tubes:
         heuristic += heuristic_for_tube(tube)
 
-    tubes = sorted(tubes, key=len)
-
-    heuristic += (len(tubes[0]) + len(tubes[1]))
+    
     return heuristic
 
 def solve(tubes):
@@ -139,12 +140,14 @@ def solve(tubes):
     while not end_state(tubes, frontier, cost):
         tubes_copy = copy.deepcopy(tubes)
         tubes_copy = sorted(tubes_copy)
-        all_moves = get_all_moves(tubes, visited, cost)
+        all_moves = get_all_moves(tubes_copy, visited, cost)
         frontier.extend(all_moves)
+        frontier.sort(key=itemgetter('cost'), reverse=True)
         frontier.sort(key=itemgetter('h'))
         frontier.sort(key=itemgetter('f'))
         # print(frontier)
         best = frontier.pop(0)
+        
         print(best)
         start = best['start']
         goal = best['goal']
