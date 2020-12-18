@@ -39,7 +39,7 @@ def actual_tests():
 
 #TODO make more robust, not feeling like doing so right now, might do while debugging
 
-tubes = [[0, 1, 1, 1], [0, 0, 0, 1], [], []]
+tubes = [[1, 3, 4, 3], [1, 1, 2, 2], [0, 2, 2, 4], [0, 1, 3, 4], [0, 0, 3, 4], [], []]
 
 main.solve(tubes)
 

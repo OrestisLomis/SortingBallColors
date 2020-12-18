@@ -64,7 +64,7 @@ def get_all_moves_from_tube(tubes, start, states, c):
             cost += 1
             h = heuristic(tubes_copy)
             f = h + cost
-            move = {'f': f, 'start': start, 'goal': goal, 'tubes': tubes_copy, 'cost': cost} #TODO fix same tubes_copy being altered (might have to solve this recursively)
+            move = {'f': f, 'start': start, 'goal': goal, 'tubes': copy.deepcopy(tubes), 'cost': cost} #TODO fix same tubes_copy being altered (might have to solve this recursively)
             all_moves.append(move)
         tubes_copy = copy.deepcopy(tubes)   
     return all_moves
@@ -75,6 +75,9 @@ def get_all_moves(tubes, states, c):
         all_moves.extend(get_all_moves_from_tube(tubes, start, states, c))
     all_moves.sort(key=itemgetter('f'))
     return all_moves
+
+# def game_over(frontier, cost):
+#     return len(frontier) == 0 and cost != 0
 
 def game_over(tubes, states, c):
     return len(get_all_moves(tubes, states, c)) == 0
@@ -95,11 +98,13 @@ def win(tubes):
             return False
     return True
 
+# def end_state(tubes, frontier, c):
 def end_state(tubes, states, c):
     if win(tubes):
         print('WIN!')
         print("cost: ", c)
         return True
+    # if game_over(frontier, c):
     if game_over(tubes, states, c):
         print('GAME OVER!')
         return True
@@ -130,13 +135,13 @@ def solve(tubes):
     visited = []
     cost = 0
     frontier = []
-    while not end_state(tubes, visited, cost):
+    while not end_state(tubes, frontier, cost):
         tubes_copy = copy.deepcopy(tubes)
         tubes_copy = sorted(tubes_copy)
         all_moves = get_all_moves(tubes, visited, cost)
         frontier.extend(all_moves)
         frontier.sort(key=itemgetter('f'))
-        print(frontier)
+        # print(frontier)
         best = frontier.pop(0)
         print(best)
         start = best['start']
@@ -151,10 +156,10 @@ def solve(tubes):
 def solve_recursive(tubes, c, visited):
     print(tubes)
     frontier = []
-    while not end_state(tubes, visited, cost):
+    while not end_state(tubes, frontier, c):
         tubes_copy = copy.deepcopy(tubes)
         tubes_copy = sorted(tubes_copy)
-        all_moves = get_all_moves(tubes, visited, cost)
+        all_moves = get_all_moves(tubes, visited, c)
         frontier.extend(all_moves)
         frontier.sort(key=itemgetter('f'))
         print(frontier)
@@ -163,7 +168,7 @@ def solve_recursive(tubes, c, visited):
         start = best['start']
         goal = best['goal']
         tubes = best['tubes']
-        cost = best['cost']
+        c = best['cost']
         print(start, goal)
         tubes = move_ball(tubes, start, goal)
         print(tubes) 
