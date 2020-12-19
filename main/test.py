@@ -39,9 +39,9 @@ def actual_tests():
 
 #TODO make more robust, not feeling like doing so right now, might do while debugging
 
-tubes = [[1, 3, 4, 3], [1, 1, 2, 2], [0, 2, 2, 4], [0, 1, 3, 4], [0, 0, 3, 4], [], []]
+tubes = [[0, 1, 0, 1], [0, 1, 0, 1], [], []]
 # tubes = [[1, 1, 2, 3], [2, 2, 2, 4], [1, 4, 3, 4], [3, 3, 1, 4], [], []]
-tubes = main.make_level(5, main.COLORS)
+tubes = main.make_level(14, main.COLORS)
 
 main.solve(tubes)
 
