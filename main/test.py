@@ -40,9 +40,10 @@ def actual_tests():
 #TODO make more robust, not feeling like doing so right now, might do while debugging
 
 tubes = [[0, 1, 0, 1], [0, 1, 0, 1], [], []]
-# tubes = [[1, 1, 2, 3], [2, 2, 2, 4], [1, 4, 3, 4], [3, 3, 1, 4], [], []]
-tubes = main.make_level(14, main.COLORS)
+# tubes = [[0, 1, 1], [0, 0, 1, 1]]
+tubes = main.make_level(10, main.COLORS)
 
+# print(main.heuristic(tubes))
 main.solve(tubes)
 
 

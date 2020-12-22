@@ -135,10 +135,31 @@ def heuristic_for_tube(tube):
 def heuristic(tubes):
     heuristic = 0
 
-    for tube in tubes:
-        heuristic += heuristic_for_tube(tube)
+    tubes_copy = copy.deepcopy(tubes)
 
+    for count, tube in enumerate(tubes_copy):
+        current = heuristic_for_tube(tube)
+        tubes_copy[count] = list((tube, current))
+
+    tubes_copy = sorted(tubes_copy)
+    nb_empty = 0
+    empty = True
+    while empty:
+        if len(tubes_copy[nb_empty][0]) == 0:
+            nb_empty += 1
+        else:
+            empty = False
     
+    tubes_copy = tubes_copy[nb_empty:]
+
+    tubes_copy = sorted(sorted(tubes_copy, key=lambda x: len(x[0]) - x[1], reverse=True), key=lambda x: x[0][0])
+
+
+    for count, tube in enumerate(tubes_copy):
+        if count > 0 and tube[0][0] == tubes_copy[count - 1][0][0]:
+            heuristic += len(tube[0])
+        else:
+            heuristic += tube[1]
     return heuristic
 
 def searching(search, states):
