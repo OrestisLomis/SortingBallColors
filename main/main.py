@@ -25,7 +25,6 @@ def make_level(level, colors):
     assert len(colors) >= 2
     all_states = [[] for i in range(len(colors) + 2)]
     # all_states = tuple(all_states)
-    print(all_states)
     for color in colors:
         balls = 0
         while balls < 4:
@@ -57,42 +56,37 @@ def can_move(tubes, start, goal, states):
     tubes_copy = copy.deepcopy(tubes)
     if can_move_physically(tubes, start, goal) and can_move_legally(tubes, start, goal):
         tubes_copy = move_ball(tubes_copy, start, goal)
-        return not visited(sorted(tubes_copy), states)
+        return not visited(tubes_copy, states)
     return False
 
-def get_all_moves_from_tube(tubes, start, states, c, search_set):
+def get_all_moves_from_tube(tubes, start, states, c, search_set, previous):
     all_moves = []
     tubes_copy = copy.deepcopy(tubes)
     for goal in range(len(tubes)):
         cost = c
         if can_move(tubes_copy, start, goal, states):
             tubes_copy = move_ball(tubes_copy, start, goal)
-            tubes_sorted = sorted(tubes_copy)
-            if visited(tubes_sorted, states) and not searching(tubes_sorted, states):
-                continue
+            # tubes_sorted = sorted(tubes_copy)
+            # if visited(tubes_sorted, states) and not searching(tubes_sorted, states):
+            #     continue
             
             cost += 1
             h = heuristic(tubes_copy)
             f = h + cost
-            move = {'f': f, 'h': h, 'start': start, 'goal': goal, 'tubes': copy.deepcopy(tubes), 'cost': cost}
+            move = {'f': f, 'h': h, 'start': start, 'goal': goal, 'tubes': copy.deepcopy(tubes), 'cost': cost, 'previous': previous}
             # search_set.add(copy.deepcopy(tuple(tubes_sorted)))
             all_moves.append(move)
         tubes_copy = copy.deepcopy(tubes)   
     return all_moves
 
-def get_all_moves(tubes, states, c, search_set):
+def get_all_moves(tubes, states, c, search_set, previous):
     all_moves = []
     for start in range(len(tubes)):
-        all_moves.extend(get_all_moves_from_tube(tubes, start, states, c, search_set))
-    # all_moves.sort(key=itemgetter('h'))
-    # all_moves.sort(key=itemgetter('f'))
+        all_moves.extend(get_all_moves_from_tube(tubes, start, states, c, search_set, previous))
     return all_moves
 
 def game_over(frontier, cost):
     return len(frontier) == 0 and cost != 0
-
-# def game_over(tubes, states, c):
-#     return len(get_all_moves(tubes, states, c)) == 0
 
 def complete(tube):
     if len(tube) == 0:
@@ -111,13 +105,11 @@ def win(tubes):
     return True
 
 def end_state(tubes, frontier, c):
-# def end_state(tubes, states, c):
     if win(tubes):
         print('WIN!')
         print("cost: ", c)
         return True
     if game_over(frontier, c):
-    # if game_over(tubes, states, c):
         print('GAME OVER!')
         return True
     return False
@@ -165,32 +157,36 @@ def heuristic(tubes):
 def searching(search, states):
     return search in states
 
+def find_path(win_state):
+    if win_state['previous'] == None:
+        return [(win_state['start'], win_state['goal'])]
+    
+    else:
+        return find_path(win_state['previous']) + [(win_state['start'], win_state['goal'])]
+    
+
+
 def solve(tubes):
-    print(tubes)
     visited = []
     search_set = set()
     cost = 0
     frontier = []
+    previous = None
     while not end_state(tubes, frontier, cost):
         tubes_copy = copy.deepcopy(tubes)
-        tubes_copy = sorted(tubes_copy)
-        all_moves = get_all_moves(tubes_copy, visited, cost, search_set)
+        all_moves = get_all_moves(tubes_copy, visited, cost, search_set, previous)
         frontier.extend(all_moves)
         frontier.sort(key=itemgetter('f'))
         frontier.sort(key=itemgetter('h'))
-        # print(frontier)
         best = frontier.pop(0)
-        
-        print(best)
+        previous = best
         start = best['start']
         goal = best['goal']
         tubes = best['tubes']
         cost = best['cost']
-        print(start, goal)
         tubes = move_ball(tubes, start, goal)
-        print(tubes) 
-        print(search_set)
-        # print(visited)
         visited.append(tubes)
+
+    return find_path(best)
 
 
